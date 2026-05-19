@@ -1,10 +1,21 @@
-import { Text, View, ScrollView } from "react-native";
-import { Colors } from "../theme";
+import { Text, View, ScrollView, Pressable } from "react-native";
+import { Link } from "expo-router";
 
 export default function Index() {
   return (
     <ScrollView className="flex-1 bg-surface">
       <View className="px-6 py-12 gap-8">
+        
+        {/* Navigation Section */}
+        <View className="bg-white p-4 rounded-2xl shadow-sm border border-border gap-2">
+          <Text className="text-h3 font-poppins-semibold text-text-primary">App Screens</Text>
+          <Link href="/onboarding" asChild>
+            <Pressable className="bg-lingua-purple py-3 rounded-xl active:opacity-80">
+              <Text className="text-white font-poppins-medium text-center">View Onboarding Screen</Text>
+            </Pressable>
+          </Link>
+        </View>
+
         
         {/* Typography Section */}
         <View className="gap-4">
