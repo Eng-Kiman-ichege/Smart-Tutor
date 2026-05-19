@@ -1,78 +1,56 @@
-import { Text, View, ScrollView, Pressable } from "react-native";
-import { Link } from "expo-router";
+import { View, Text, SafeAreaView, Pressable, Image } from 'react-native';
+import { useRouter, Link } from 'expo-router';
+import { Ionicons } from '@expo-vector-icons';
 
-export default function Index() {
+export default function OnboardingScreen() {
+  const router = useRouter();
+
   return (
-    <ScrollView className="flex-1 bg-surface">
-      <View className="px-6 py-12 gap-8">
-        
-        {/* Navigation Section */}
-        <View className="bg-white p-4 rounded-2xl shadow-sm border border-border gap-2">
-          <Text className="text-h3 font-poppins-semibold text-text-primary">App Screens</Text>
-          <Link href="/onboarding" asChild>
-            <Pressable className="bg-lingua-purple py-3 rounded-xl active:opacity-80">
-              <Text className="text-white font-poppins-medium text-center">View Onboarding Screen</Text>
-            </Pressable>
-          </Link>
-        </View>
-
-        
-        {/* Typography Section */}
-        <View className="gap-4">
-          <Text className="text-h1 font-poppins-bold text-text-primary">Typography</Text>
-          <View className="gap-2">
-            <Text className="text-h1 font-poppins-bold text-text-primary">H1 - Page Title</Text>
-            <Text className="text-h2 font-poppins-semibold text-text-primary">H2 - Section Title</Text>
-            <Text className="text-h3 font-poppins-semibold text-text-primary">H3 - Card Title</Text>
-            <Text className="text-h4 font-poppins-medium text-text-primary">H4 - Subheading</Text>
-            <Text className="text-body-lg font-poppins text-text-primary">Body Large - Important content</Text>
-            <Text className="text-body-md font-poppins text-text-primary">Body Medium - Body text</Text>
-            <Text className="text-body-sm font-poppins text-text-secondary">Body Small - Supporting text</Text>
-            <Text className="text-caption font-poppins text-text-secondary">Caption - Labels, meta text</Text>
-          </View>
-        </View>
-
-        {/* Colors Section */}
-        <View className="gap-4">
-          <Text className="text-h2 font-poppins-semibold text-text-primary">Colors</Text>
-          
-          <Text className="text-h4 font-poppins-medium text-text-primary mt-2">Primary</Text>
-          <View className="flex-row flex-wrap gap-4">
-            <ColorSwatch bgClass="bg-lingua-purple" name="Purple" />
-            <ColorSwatch bgClass="bg-lingua-deep-purple" name="Deep Purple" />
-            <ColorSwatch bgClass="bg-lingua-blue" name="Blue" />
-            <ColorSwatch bgClass="bg-lingua-green" name="Green" />
-          </View>
-
-          <Text className="text-h4 font-poppins-medium text-text-primary mt-2">Semantic</Text>
-          <View className="flex-row flex-wrap gap-4">
-            <ColorSwatch bgClass="bg-success" name="Success" />
-            <ColorSwatch bgClass="bg-warning" name="Warning" />
-            <ColorSwatch bgClass="bg-streak" name="Streak" />
-            <ColorSwatch bgClass="bg-error" name="Error" />
-            <ColorSwatch bgClass="bg-info" name="Info" />
-          </View>
-
-          <Text className="text-h4 font-poppins-medium text-text-primary mt-2">Neutrals</Text>
-          <View className="flex-row flex-wrap gap-4">
-            <ColorSwatch bgClass="bg-text-primary" name="Text Primary" />
-            <ColorSwatch bgClass="bg-text-secondary" name="Text Secondary" />
-            <ColorSwatch bgClass="bg-border" name="Border" />
-            <ColorSwatch bgClass="bg-surface" name="Surface" />
-            <ColorSwatch bgClass="bg-background" name="Background" border />
-          </View>
-        </View>
-
+    <SafeAreaView className="flex-1 bg-background">
+      {/* Top Logo */}
+      <View className="flex-row items-center justify-center mt-4">
+        <Image 
+          source={require('../assets/images/moscot-logo.png')} 
+          className="w-10 h-10"
+          resizeMode="contain"
+        />
+        <Text className="text-h2 font-poppins-bold text-text-primary ml-2 tracking-tight">muolingo</Text>
       </View>
-    </ScrollView>
-  );
-}
 
-function ColorSwatch({ bgClass, name, border }: { bgClass: string, name: string, border?: boolean }) {
-  return (
-    <View className="items-center gap-2">
-      <View className={`w-16 h-16 rounded-xl ${bgClass} ${border ? 'border border-border' : ''}`} />
-      <Text className="text-caption font-poppins text-text-secondary">{name}</Text>
-    </View>
+      <View className="flex-1 px-6 justify-center mt-8">
+        {/* Text Section */}
+        <View className="mb-8">
+          <Text className="text-h1 font-poppins-bold text-text-primary">
+            Your AI language{'\n'}<Text className="text-lingua-purple">teacher.</Text>
+          </Text>
+          <Text className="text-body-lg font-poppins text-text-secondary mt-4 leading-[1.6]">
+            Real conversations, personalized{'\n'}lessons, anytime, anywhere.
+          </Text>
+        </View>
+
+        {/* Mascot Image */}
+        <View className="items-center flex-1 justify-center min-h-[300px]">
+          <Image 
+            source={require('../assets/images/mascot-welcome.png')} 
+            className="w-full max-w-[320px] aspect-square"
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+
+      {/* Bottom Button */}
+      <View className="px-6 pb-12 pt-4">
+        <Link href="/design-system" asChild>
+          <Pressable 
+            className="bg-lingua-purple flex-row items-center justify-center py-4 rounded-2xl active:opacity-80 relative"
+          >
+            <Text className="text-h4 font-poppins-semibold text-white">Get Started</Text>
+            <View className="absolute right-6">
+              <Ionicons name="chevron-forward" size={24} color="white" />
+            </View>
+          </Pressable>
+        </Link>
+      </View>
+    </SafeAreaView>
   );
 }
