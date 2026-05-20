@@ -14,7 +14,8 @@ import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { useSignIn, useSSO } from '@clerk/expo';
+import { useSSO } from '@clerk/expo';
+import { useSignIn } from '@clerk/expo/legacy';
 import { useWarmUpBrowser } from '../hooks/useWarmUpBrowser';
 import VerificationModal from '../components/VerificationModal';
 
@@ -44,12 +45,24 @@ export default function SignInScreen() {
 
     try {
       // Start passwordless sign-in flow
-      await signIn.create({
+      const response = await signIn.create({
         identifier: email,
       });
 
+      // Find the email_code factor to get its emailAddressId
+      const emailCodeFactor = response.supportedFirstFactors?.find(
+        (factor) => factor.strategy === 'email_code'
+      );
+
+      if (!emailCodeFactor || !('emailAddressId' in emailCodeFactor)) {
+        throw new Error('Email verification code strategy is not available for this email.');
+      }
+
       // Prepare OTP code to be sent to user's email
-      await signIn.prepareFirstFactor({ strategy: 'email_code' });
+      await signIn.prepareFirstFactor({
+        strategy: 'email_code',
+        emailAddressId: emailCodeFactor.emailAddressId as string,
+      });
       
       setModalVisible(true);
     } catch (err: any) {
@@ -253,7 +266,5 @@ export default function SignInScreen() {
         onVerifyCode={handleVerifyCode}
       />
     </SafeAreaView>
-  );
-}
   );
 }

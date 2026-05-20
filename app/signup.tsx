@@ -14,7 +14,8 @@ import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
-import { useSignUp, useSSO } from '@clerk/expo';
+import { useSSO } from '@clerk/expo';
+import { useSignUp } from '@clerk/expo/legacy';
 import { useWarmUpBrowser } from '../hooks/useWarmUpBrowser';
 import VerificationModal from '../components/VerificationModal';
 
