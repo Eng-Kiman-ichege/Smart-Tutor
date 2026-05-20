@@ -5,12 +5,19 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { languages } from '../data/languages';
+import { useLearningStore } from '../store/useLearningStore';
+import { LanguageId } from '../types/learning';
 import earthImage from '../assets/images/earth.png';
 
-export default function HomeLanguageSelectionScreen() {
+export default function LanguageSelectionScreen() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  
+  const persistedLanguage = useLearningStore((state) => state.selectedLanguage);
+  const setSelectedLanguageStore = useLearningStore((state) => state.setSelectedLanguage);
+
+  // Initialize local selection state from persisted store
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageId | null>(persistedLanguage);
 
   const filteredLanguages = languages.filter((lang) => 
     lang.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -18,9 +25,8 @@ export default function HomeLanguageSelectionScreen() {
 
   const handleConfirm = () => {
     if (selectedLanguage) {
-      // In a real app, save the selected language to user profile/state here.
-      // After confirmation, we can show a success toast or proceed to the lessons.
-      alert(`Selected ${languages.find(l => l.id === selectedLanguage)?.name}!`);
+      setSelectedLanguageStore(selectedLanguage);
+      router.replace('/');
     }
   };
 
@@ -28,12 +34,16 @@ export default function HomeLanguageSelectionScreen() {
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
       <View className="flex-row items-center px-6 pt-4 pb-2">
-        <Pressable 
-          onPress={() => router.push('/profile')}
-          className="w-10 h-10 items-center justify-center -ml-2 bg-surface border border-border/40 rounded-full active:opacity-70"
-        >
-          <Ionicons name="person" size={20} color="#0D132B" />
-        </Pressable>
+        {persistedLanguage ? (
+          <Pressable 
+            onPress={() => router.back()}
+            className="w-10 h-10 items-center justify-center -ml-2 bg-surface border border-border/40 rounded-full active:opacity-70"
+          >
+            <Ionicons name="chevron-back" size={22} color="#0D132B" />
+          </Pressable>
+        ) : (
+          <View className="w-10 h-10" />
+        )}
         <Text className="flex-1 text-[20px] font-poppins-semibold text-text-primary text-center mr-8 tracking-tight">
           Choose a language
         </Text>

@@ -17,13 +17,31 @@ SplashScreen.preventAutoHideAsync();
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
+import { useLearningStore } from "../store/useLearningStore";
+import { useState } from "react";
+
 function AuthProtect() {
   const { isLoaded, isSignedIn } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const selectedLanguage = useLearningStore((state) => state.selectedLanguage);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    // Check if store has hydrated from AsyncStorage
+    const unsubFinishHydration = useLearningStore.persist.onFinishHydration(() => setHydrated(true));
+    
+    if (useLearningStore.persist.hasHydrated()) {
+      setHydrated(true);
+    }
+
+    return () => {
+      unsubFinishHydration();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded || !hydrated) return;
 
     const currentSegment = segments[0];
     const isAuthPage = currentSegment === 'onboarding' || currentSegment === 'signin' || currentSegment === 'signup';
@@ -31,13 +49,18 @@ function AuthProtect() {
     if (!isSignedIn && !isAuthPage) {
       // Not signed in, trying to access a protected page -> redirect to onboarding
       router.replace("/onboarding");
-    } else if (isSignedIn && isAuthPage) {
-      // Signed in, trying to access an auth page -> redirect to dashboard
-      router.replace("/");
+    } else if (isSignedIn) {
+      if (!selectedLanguage && currentSegment !== 'language-selection') {
+        // Authenticated but no language selected -> force redirect to language selection
+        router.replace("/language-selection");
+      } else if (selectedLanguage && isAuthPage) {
+        // Authenticated and has language selected -> redirect away from auth pages to home
+        router.replace("/");
+      }
     }
-  }, [isLoaded, isSignedIn, segments]);
+  }, [isLoaded, hydrated, isSignedIn, selectedLanguage, segments]);
 
-  if (!isLoaded) {
+  if (!isLoaded || !hydrated) {
     return null;
   }
 

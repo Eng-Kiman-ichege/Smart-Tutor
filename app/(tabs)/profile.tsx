@@ -3,16 +3,17 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useUser, useAuth } from '@clerk/expo';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useLearningStore } from '../../store/useLearningStore';
 
 // Top-level imports for assets
-import moscotLogo from '../assets/images/moscot-logo.png';
+import moscotLogo from '../../assets/images/moscot-logo.png';
 
 export default function ProfileScreen() {
   const { user, isLoaded } = useUser();
   const { signOut } = useAuth();
-  const router = useRouter();
+  const { selectedLanguage, clearLanguage } = useLearningStore();
 
   if (!isLoaded) {
     return null;
@@ -29,19 +30,6 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* Header */}
-      <View className="flex-row items-center px-6 pt-4 pb-2">
-        <Pressable 
-          onPress={() => router.replace('/')}
-          className="w-10 h-10 items-center justify-center -ml-2"
-        >
-          <Ionicons name="chevron-back" size={24} color="#0D132B" />
-        </Pressable>
-        <Text className="flex-1 text-[20px] font-poppins-semibold text-text-primary text-center mr-8 tracking-tight">
-          Profile
-        </Text>
-      </View>
-
       <ScrollView 
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
@@ -73,11 +61,19 @@ export default function ProfileScreen() {
                 <Ionicons name="person" size={32} color="#6C4EF5" />
               </View>
               <Text className="text-[26px] font-poppins-bold text-text-primary text-center tracking-tight leading-tight">
-                My Profile
+                Your Profile
               </Text>
               <Text className="text-body-md font-poppins text-text-secondary text-center mt-2 leading-[1.5] px-4">
-                Manage your account settings and language learning preferences.
+                Manage your Smart Tutor language preferences and Clerk account.
               </Text>
+              {selectedLanguage && (
+                <View className="mt-3 px-4 py-1.5 bg-lingua-purple/10 rounded-full flex-row items-center gap-1.5">
+                  <Ionicons name="language" size={14} color="#6C4EF5" />
+                  <Text className="text-[14px] font-poppins-semibold text-lingua-purple">
+                    Active Language: {selectedLanguage.toUpperCase()}
+                  </Text>
+                </View>
+              )}
             </View>
 
             {/* Profile Glassmorphic Info Card */}
@@ -135,7 +131,7 @@ export default function ProfileScreen() {
 
           {/* Bottom CTA Buttons */}
           <View className="pt-6 pb-4 max-w-[400px] w-full self-center gap-3">
-            <Link href="/" asChild>
+            <Link href="/language-selection" asChild>
               <Pressable className="active:scale-[0.98] transition-all">
                 <View className="bg-lingua-purple border border-lingua-purple flex-row items-center justify-center py-4 rounded-2xl active:bg-lingua-purple/90">
                   <Ionicons name="language-outline" size={20} color="#FFFFFF" className="mr-2" />
@@ -145,6 +141,21 @@ export default function ProfileScreen() {
                 </View>
               </Pressable>
             </Link>
+
+            <Pressable 
+              onPress={() => {
+                clearLanguage();
+                alert('Selected language cleared from local storage! Navigation guard will activate.');
+              }}
+              className="active:scale-[0.98] transition-all"
+            >
+              <View className="bg-red-50 border border-red-200 flex-row items-center justify-center py-4 rounded-2xl active:bg-red-100">
+                <Ionicons name="trash-outline" size={20} color="#EF4444" className="mr-2" />
+                <Text className="text-body-lg font-poppins-semibold text-red-600 ml-2">
+                  Clear Language (Test)
+                </Text>
+              </View>
+            </Pressable>
 
             <Pressable 
               onPress={() => signOut()}
