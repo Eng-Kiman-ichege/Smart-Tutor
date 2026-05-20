@@ -12,13 +12,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
+import { useSignUp, useSSO } from '@clerk/expo';
+import { useWarmUpBrowser } from '../hooks/useWarmUpBrowser';
 import VerificationModal from '../components/VerificationModal';
 
 // Static asset import
 import mascotAuth from '../assets/images/mascot-auth.png';
 
+WebBrowser.maybeCompleteAuthSession();
+
 export default function SignUpScreen() {
   const router = useRouter();
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const { startSSOFlow } = useSSO();
+  useWarmUpBrowser();
   
   // State variables
   const [email, setEmail] = useState('alex@gmail.com');
@@ -27,17 +36,69 @@ export default function SignUpScreen() {
   const [modalVisible, setModalVisible] = useState(false);
 
   // Triggered when Sign Up is pressed
-  const handleSignUp = () => {
-    // Open verification modal
-    setModalVisible(true);
+  const handleSignUp = async () => {
+    if (!isLoaded) return;
+    
+    if (!email || !password) {
+      alert('Please enter both email and password.');
+      return;
+    }
+
+    try {
+      await signUp.create({
+        emailAddress: email,
+        password,
+      });
+
+      // Send the 6-digit OTP code to user's email
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      
+      // Open verification modal
+      setModalVisible(true);
+    } catch (err: any) {
+      console.error('Sign Up error:', err);
+      const errMsg = err?.message || err?.errors?.[0]?.message || 'Sign up failed. Please try again.';
+      alert(errMsg);
+    }
   };
 
-  // Called when the 6th digit is correctly entered in the modal
-  const handleVerifySuccess = () => {
-    setModalVisible(false);
-    // Replace stack to home route (/)
-    router.replace('/');
+  // Called to complete verification when the 6th digit is correctly entered in the modal
+  const handleVerifyCode = async (code: string) => {
+    if (!isLoaded) return;
+
+    const completeSignUp = await signUp.attemptEmailAddressVerification({
+      code,
+    });
+
+    if (completeSignUp.status === 'complete') {
+      await setActive({ session: completeSignUp.createdSessionId });
+      setModalVisible(false);
+      router.replace('/');
+    } else {
+      console.error('Sign up incomplete:', completeSignUp.status);
+      throw new Error(`Sign up is incomplete. Status: ${completeSignUp.status}`);
+    }
   };
+
+  // Handles social SSO authentication calls
+  const handleSSO = async (strategy: 'oauth_google' | 'oauth_facebook' | 'oauth_apple') => {
+    try {
+      const { createdSessionId, setActive: setSSOActive } = await startSSOFlow({
+        strategy,
+        redirectUrl: Linking.createURL('/oauth-callback', { scheme: 'languages' }),
+      });
+
+      if (createdSessionId && setSSOActive) {
+        await setSSOActive({ session: createdSessionId });
+        router.replace('/');
+      }
+    } catch (err: any) {
+      console.error('SSO Login error:', err);
+      const errMsg = err?.message || err?.errors?.[0]?.message || 'Social login failed. Please try again.';
+      alert(errMsg);
+    }
+  };
+
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -54,7 +115,7 @@ export default function SignUpScreen() {
             
             {/* Header / Back Navigation */}
             <View className="flex-row items-center justify-between mb-4">
-              <Link href="/" asChild>
+              <Link href="/onboarding" asChild>
                 <Pressable className="w-10 h-10 items-center justify-center bg-surface border border-border/40 rounded-full active:opacity-70">
                   <Ionicons name="chevron-back" size={22} color="#0D132B" />
                 </Pressable>
@@ -101,7 +162,9 @@ export default function SignUpScreen() {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
+                    underlineColorAndroid="transparent"
                     className="text-[16px] font-poppins-semibold text-text-primary mt-0.5 py-0.5"
+                    style={{ outline: 'none' } as any}
                   />
                 </View>
 
@@ -119,7 +182,9 @@ export default function SignUpScreen() {
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
                       autoCorrect={false}
+                      underlineColorAndroid="transparent"
                       className="text-[16px] font-poppins-semibold text-text-primary flex-1 py-0.5"
+                      style={{ outline: 'none' } as any}
                     />
                     <Pressable 
                       onPress={() => setShowPassword(!showPassword)}
@@ -161,7 +226,10 @@ export default function SignUpScreen() {
               <View className="gap-2.5">
                 
                 {/* Google Button */}
-                <Pressable className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all">
+                <Pressable 
+                  onPress={() => handleSSO('oauth_google')}
+                  className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all"
+                >
                   <Ionicons name="logo-google" size={18} color="#EA4335" />
                   <Text className="text-body-md font-poppins-medium text-text-primary ml-3">
                     Continue with Google
@@ -169,7 +237,10 @@ export default function SignUpScreen() {
                 </Pressable>
 
                 {/* Facebook Button */}
-                <Pressable className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all">
+                <Pressable 
+                  onPress={() => handleSSO('oauth_facebook')}
+                  className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all"
+                >
                   <Ionicons name="logo-facebook" size={18} color="#1877F2" />
                   <Text className="text-body-md font-poppins-medium text-text-primary ml-3">
                     Continue with Facebook
@@ -177,7 +248,10 @@ export default function SignUpScreen() {
                 </Pressable>
 
                 {/* Apple Button */}
-                <Pressable className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all">
+                <Pressable 
+                  onPress={() => handleSSO('oauth_apple')}
+                  className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all"
+                >
                   <Ionicons name="logo-apple" size={18} color="#000000" />
                   <Text className="text-body-md font-poppins-medium text-text-primary ml-3">
                     Continue with Apple
@@ -209,7 +283,7 @@ export default function SignUpScreen() {
         visible={modalVisible}
         email={email}
         onClose={() => setModalVisible(false)}
-        onVerifySuccess={handleVerifySuccess}
+        onVerifyCode={handleVerifyCode}
       />
     </SafeAreaView>
   );

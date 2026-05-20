@@ -12,30 +12,91 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
+import { useSignIn, useSSO } from '@clerk/expo';
+import { useWarmUpBrowser } from '../hooks/useWarmUpBrowser';
 import VerificationModal from '../components/VerificationModal';
 
 // Static asset import
 import mascotAuth from '../assets/images/mascot-auth.png';
 
+WebBrowser.maybeCompleteAuthSession();
+
 export default function SignInScreen() {
   const router = useRouter();
+  const { isLoaded, signIn, setActive } = useSignIn();
+  const { startSSOFlow } = useSSO();
+  useWarmUpBrowser();
   
   // State variables
   const [email, setEmail] = useState('alex@gmail.com');
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Triggered when Log In is pressed
-  const handleSignIn = () => {
-    // Open verification modal
-    setModalVisible(true);
+  // Triggered when Log In is pressed (triggers Clerk passwordless flow)
+  const handleSignIn = async () => {
+    if (!isLoaded) return;
+
+    if (!email) {
+      alert('Please enter your email address.');
+      return;
+    }
+
+    try {
+      // Start passwordless sign-in flow
+      await signIn.create({
+        identifier: email,
+      });
+
+      // Prepare OTP code to be sent to user's email
+      await signIn.prepareFirstFactor({ strategy: 'email_code' });
+      
+      setModalVisible(true);
+    } catch (err: any) {
+      console.error('Sign In error:', err);
+      const errMsg = err?.message || err?.errors?.[0]?.message || 'Sign in failed. Please try again.';
+      alert(errMsg);
+    }
   };
 
-  // Called when the 6th digit is correctly entered in the modal
-  const handleVerifySuccess = () => {
-    setModalVisible(false);
-    // Replace stack to home route (/)
-    router.replace('/');
+  // Called to complete verification when the 6th digit is entered in the modal
+  const handleVerifyCode = async (code: string) => {
+    if (!isLoaded) return;
+
+    const completeSignIn = await signIn.attemptFirstFactor({
+      strategy: 'email_code',
+      code,
+    });
+
+    if (completeSignIn.status === 'complete') {
+      await setActive({ session: completeSignIn.createdSessionId });
+      setModalVisible(false);
+      router.replace('/');
+    } else {
+      console.error('Sign in incomplete status:', completeSignIn.status);
+      throw new Error(`Sign in is incomplete. Status: ${completeSignIn.status}`);
+    }
   };
+
+  // Handles social SSO authentication calls
+  const handleSSO = async (strategy: 'oauth_google' | 'oauth_facebook' | 'oauth_apple') => {
+    try {
+      const { createdSessionId, setActive: setSSOActive } = await startSSOFlow({
+        strategy,
+        redirectUrl: Linking.createURL('/oauth-callback', { scheme: 'languages' }),
+      });
+
+      if (createdSessionId && setSSOActive) {
+        await setSSOActive({ session: createdSessionId });
+        router.replace('/');
+      }
+    } catch (err: any) {
+      console.error('SSO Login error:', err);
+      const errMsg = err?.message || err?.errors?.[0]?.message || 'Social login failed. Please try again.';
+      alert(errMsg);
+    }
+  };
+
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -52,7 +113,7 @@ export default function SignInScreen() {
             
             {/* Header / Back Navigation */}
             <View className="flex-row items-center justify-between mb-4">
-              <Link href="/" asChild>
+              <Link href="/onboarding" asChild>
                 <Pressable className="w-10 h-10 items-center justify-center bg-surface border border-border/40 rounded-full active:opacity-70">
                   <Ionicons name="chevron-back" size={22} color="#0D132B" />
                 </Pressable>
@@ -99,7 +160,9 @@ export default function SignInScreen() {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
+                    underlineColorAndroid="transparent"
                     className="text-[16px] font-poppins-semibold text-text-primary mt-0.5 py-0.5"
+                    style={{ outline: 'none' } as any}
                   />
                 </View>
 
@@ -130,7 +193,10 @@ export default function SignInScreen() {
               <View className="gap-2.5">
                 
                 {/* Google Button */}
-                <Pressable className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all">
+                <Pressable 
+                  onPress={() => handleSSO('oauth_google')}
+                  className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all"
+                >
                   <Ionicons name="logo-google" size={18} color="#EA4335" />
                   <Text className="text-body-md font-poppins-medium text-text-primary ml-3">
                     Continue with Google
@@ -138,7 +204,10 @@ export default function SignInScreen() {
                 </Pressable>
 
                 {/* Facebook Button */}
-                <Pressable className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all">
+                <Pressable 
+                  onPress={() => handleSSO('oauth_facebook')}
+                  className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all"
+                >
                   <Ionicons name="logo-facebook" size={18} color="#1877F2" />
                   <Text className="text-body-md font-poppins-medium text-text-primary ml-3">
                     Continue with Facebook
@@ -146,7 +215,10 @@ export default function SignInScreen() {
                 </Pressable>
 
                 {/* Apple Button */}
-                <Pressable className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all">
+                <Pressable 
+                  onPress={() => handleSSO('oauth_apple')}
+                  className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all"
+                >
                   <Ionicons name="logo-apple" size={18} color="#000000" />
                   <Text className="text-body-md font-poppins-medium text-text-primary ml-3">
                     Continue with Apple
@@ -178,8 +250,10 @@ export default function SignInScreen() {
         visible={modalVisible}
         email={email}
         onClose={() => setModalVisible(false)}
-        onVerifySuccess={handleVerifySuccess}
+        onVerifyCode={handleVerifyCode}
       />
     </SafeAreaView>
+  );
+}
   );
 }

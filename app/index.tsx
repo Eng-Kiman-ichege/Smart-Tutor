@@ -1,93 +1,29 @@
-import { useEffect } from 'react';
+import React from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
+import { useUser, useAuth } from '@clerk/expo';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, { 
-  useSharedValue, 
-  useAnimatedStyle, 
-  withRepeat, 
-  withTiming, 
-  withSequence,
-  withDelay,
-  Easing 
-} from 'react-native-reanimated';
 
 // Top-level imports for assets
 import moscotLogo from '../assets/images/moscot-logo.png';
-import mascotWelcome from '../assets/images/mascot-welcome.png';
 
-export default function OnboardingScreen() {
-  // Shared values for floating animations
-  const helloY = useSharedValue(0);
-  const holaY = useSharedValue(0);
-  const nihaoY = useSharedValue(0);
-  
-  // Shared values for mascot & glow entrance
-  const mascotScale = useSharedValue(0.9);
-  const mascotOpacity = useSharedValue(0);
+export default function HomeDashboardScreen() {
+  const { user, isLoaded } = useUser();
+  const { signOut } = useAuth();
 
-  useEffect(() => {
-    // Mascot entrance animation
-    mascotScale.value = withTiming(1, { 
-      duration: 800, 
-      easing: Easing.out(Easing.back(1.2)) 
-    });
-    mascotOpacity.value = withTiming(1, { duration: 600 });
+  if (!isLoaded) {
+    return null;
+  }
 
-    // Floating animations for each bubble with organic timing offsets
-    helloY.value = withRepeat(
-      withSequence(
-        withTiming(-5, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0, { duration: 2000, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    holaY.value = withDelay(
-      300,
-      withRepeat(
-        withSequence(
-          withTiming(-7, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 2200, easing: Easing.inOut(Easing.ease) })
-        ),
-        -1,
-        true
-      )
-    );
-
-    nihaoY.value = withDelay(
-      600,
-      withRepeat(
-        withSequence(
-          withTiming(-4, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.ease) })
-        ),
-        -1,
-        true
-      )
-    );
-  }, []);
-
-  // Animated styles for floating speech bubbles
-  const helloAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: helloY.value }, { rotate: '-6deg' }],
-  }));
-
-  const holaAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: holaY.value }, { rotate: '6deg' }],
-  }));
-
-  const nihaoAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: nihaoY.value }, { rotate: '8deg' }],
-  }));
-
-  const mascotAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: mascotScale.value }],
-    opacity: mascotOpacity.value,
-  }));
+  // Formatting signup date safely
+  const formattedDate = user?.createdAt 
+    ? new Date(user.createdAt).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      })
+    : 'Recently';
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -113,82 +49,88 @@ export default function OnboardingScreen() {
             </View>
           </View>
 
-          {/* Center Main Content Container */}
+          {/* Center Main Dashboard Content */}
           <View className="flex-1 justify-center max-w-[400px] w-full self-center">
             
-            {/* Modern Typography Text Section */}
-            <View className="mb-4">
-              <View className="flex-row items-center mb-2">
-                <View className="w-8 h-[2px] bg-lingua-purple/30 mr-2" />
-                <Text className="text-caption font-poppins-bold uppercase tracking-[0.2em] text-lingua-purple">AI-Powered Learning</Text>
+            {/* Title Block */}
+            <View className="mb-6 items-center">
+              <View className="w-16 h-16 bg-lingua-purple/10 rounded-full items-center justify-center mb-4">
+                <Ionicons name="sparkles" size={32} color="#6C4EF5" />
               </View>
-              <Text className="text-[32px] font-poppins-bold text-text-primary leading-[1.15] tracking-tight">
-                Your AI language{'\n'}
-                <Text className="text-lingua-purple font-poppins-bold">teacher.</Text>
+              <Text className="text-[26px] font-poppins-bold text-text-primary text-center tracking-tight leading-tight">
+                Welcome to Smart Tutor!
               </Text>
-              <Text className="text-body-md font-poppins text-text-secondary mt-3 leading-[1.6]">
-                Real conversations, personalized lessons, anytime, anywhere.
+              <Text className="text-body-md font-poppins text-text-secondary text-center mt-2 leading-[1.5] px-4">
+                Your Clerk authentication has successfully verified. Let's begin learning!
               </Text>
             </View>
 
-            {/* Mascot & Modern Ambient Glow Backdrop */}
-            <View className="items-center justify-center my-6 relative py-4">
-              <View className="relative w-full max-w-[290px] aspect-square items-center justify-center">
-                
-                {/* Soft Ambient Aurora Backdrops (Overlapping Glowing Orbs - Android-Safe) */}
-                <View className="absolute w-[220px] h-[220px] rounded-full bg-lingua-purple/[0.04] -z-10" />
-                <View className="absolute w-[160px] h-[160px] rounded-full bg-lingua-blue/[0.04] -z-10 translate-x-[30px] translate-y-[-30px]" />
-                <View className="absolute w-[270px] h-[270px] rounded-full border border-surface/40 -z-10" />
-                <View className="absolute w-[210px] h-[210px] rounded-full border border-dashed border-border/40 -z-10" />
+            {/* Profile Glassmorphic Info Card */}
+            <View className="bg-surface/30 border border-border/80 rounded-[28px] p-5 shadow-sm relative overflow-hidden mb-6">
+              {/* Subtle Ambient Background Gradients inside the card */}
+              <View className="absolute top-0 right-0 w-24 h-24 bg-lingua-purple/5 rounded-full filter blur-xl -z-10" />
+              <View className="absolute bottom-0 left-0 w-24 h-24 bg-lingua-blue/5 rounded-full filter blur-xl -z-10" />
 
-                {/* Mascot Image (Animated Entry) */}
-                <Animated.View style={mascotAnimatedStyle} className="items-center justify-center">
-                  <Image 
-                    source={mascotWelcome} 
-                    className="w-[230px] h-[230px]"
-                    contentFit="contain"
-                  />
-                </Animated.View>
-                
-                {/* Hello! Glassmorphic Speech Bubble (Top Left) */}
-                <Animated.View 
-                  style={helloAnimatedStyle}
-                  className="absolute top-[8%] left-[0%] bg-white/95 border border-border/40 px-4 py-2 rounded-2xl shadow-lg"
-                >
-                  <Text className="text-[14px] font-poppins-semibold text-text-primary">Hello!</Text>
-                </Animated.View>
+              <Text className="text-caption font-poppins-bold uppercase tracking-wider text-text-secondary mb-4">
+                AUTHENTICATED PROFILE
+              </Text>
 
-                {/* ¡Hola! Glassmorphic Speech Bubble (Top Right) */}
-                <Animated.View 
-                  style={holaAnimatedStyle}
-                  className="absolute top-[2%] right-[4%] bg-white/95 border border-border/40 px-4 py-2 rounded-2xl shadow-lg"
-                >
-                  <Text className="text-[14px] font-poppins-semibold text-lingua-purple">¡Hola!</Text>
-                </Animated.View>
-
-                {/* 你好! Glassmorphic Speech Bubble (Middle Right) */}
-                <Animated.View 
-                  style={nihaoAnimatedStyle}
-                  className="absolute top-[38%] right-[0%] bg-white/95 border border-border/40 px-4 py-2 rounded-2xl shadow-lg"
-                >
-                  <Text className="text-[14px] font-poppins-semibold text-[#FF6C3B]">你好!</Text>
-                </Animated.View>
+              {/* Email Block */}
+              <View className="flex-row items-center mb-4 pb-3 border-b border-border/40">
+                <View className="w-10 h-10 bg-white border border-border/50 rounded-xl items-center justify-center mr-3.5 shadow-sm">
+                  <Ionicons name="mail" size={20} color="#6C4EF5" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-[11px] font-poppins-bold text-text-secondary uppercase tracking-wider">Email Address</Text>
+                  <Text className="text-[15px] font-poppins-semibold text-text-primary truncate mt-0.5" numberOfLines={1}>
+                    {user?.primaryEmailAddress?.emailAddress || 'Not Provided'}
+                  </Text>
+                </View>
               </View>
+
+              {/* Clerk ID Block */}
+              <View className="flex-row items-center mb-4 pb-3 border-b border-border/40">
+                <View className="w-10 h-10 bg-white border border-border/50 rounded-xl items-center justify-center mr-3.5 shadow-sm">
+                  <Ionicons name="finger-print" size={20} color="#3B82F6" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-[11px] font-poppins-bold text-text-secondary uppercase tracking-wider">Clerk User ID</Text>
+                  <Text className="text-[14px] font-mono text-text-secondary truncate mt-0.5 select-all" numberOfLines={1}>
+                    {user?.id || 'Unknown'}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Created At Block */}
+              <View className="flex-row items-center">
+                <View className="w-10 h-10 bg-white border border-border/50 rounded-xl items-center justify-center mr-3.5 shadow-sm">
+                  <Ionicons name="calendar" size={20} color="#FF6C3B" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-[11px] font-poppins-bold text-text-secondary uppercase tracking-wider">Member Since</Text>
+                  <Text className="text-[15px] font-poppins-semibold text-text-primary mt-0.5">
+                    {formattedDate}
+                  </Text>
+                </View>
+              </View>
+
             </View>
+
           </View>
 
-          {/* Bottom Button Section (Ultra-Modern Premium Button) */}
+          {/* Bottom Sign Out CTA Button */}
           <View className="pt-6 pb-4 max-w-[400px] w-full self-center">
-            <Link href="/signup" asChild>
-              <Pressable className="active:scale-[0.98] transition-all">
-                <View className="bg-lingua-purple flex-row items-center justify-center py-4 rounded-2xl border-t border-white/20 shadow-lg shadow-lingua-purple/30 relative overflow-hidden">
-                  <Text className="text-h4 font-poppins-semibold text-white tracking-wide">Get Started</Text>
-                  <View className="absolute right-6">
-                    <Ionicons name="arrow-forward" size={20} color="white" />
-                  </View>
-                </View>
-              </Pressable>
-            </Link>
+            <Pressable 
+              onPress={() => signOut()}
+              className="active:scale-[0.98] transition-all"
+            >
+              <View className="bg-[#1A2342]/5 border border-border/60 flex-row items-center justify-center py-4 rounded-2xl active:bg-[#1A2342]/10">
+                <Ionicons name="log-out-outline" size={20} color="#4B5563" className="mr-2" />
+                <Text className="text-body-lg font-poppins-semibold text-gray-700 ml-2">
+                  Sign Out
+                </Text>
+              </View>
+            </Pressable>
           </View>
 
         </View>

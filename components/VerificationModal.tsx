@@ -7,7 +7,8 @@ import {
   Pressable, 
   KeyboardAvoidingView, 
   Platform,
-  StyleSheet
+  StyleSheet,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -15,22 +16,26 @@ interface VerificationModalProps {
   visible: boolean;
   email: string;
   onClose: () => void;
-  onVerifySuccess: () => void;
+  onVerifyCode: (code: string) => Promise<void>;
 }
 
 export default function VerificationModal({ 
   visible, 
   email, 
   onClose, 
-  onVerifySuccess 
+  onVerifyCode 
 }: VerificationModalProps) {
   const [code, setCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<TextInput>(null);
 
   // Auto-focus the input when modal becomes visible
   useEffect(() => {
     if (visible) {
       setCode('');
+      setError(null);
+      setIsVerifying(false);
       // Delay slightly to ensure layout has mounted and keyboard can open
       setTimeout(() => {
         inputRef.current?.focus();
@@ -39,16 +44,31 @@ export default function VerificationModal({
   }, [visible]);
 
   // Handle text change and verify when 6 digits are entered
-  const handleTextChange = (text: string) => {
+  const handleTextChange = async (text: string) => {
+    if (isVerifying) return;
+
     // Only allow numbers
     const cleanText = text.replace(/[^0-9]/g, '');
     setCode(cleanText);
+    setError(null);
 
     if (cleanText.length === 6) {
-      // Small delay to allow the last digit to render visually before routing
-      setTimeout(() => {
-        onVerifySuccess();
-      }, 150);
+      setIsVerifying(true);
+      try {
+        await onVerifyCode(cleanText);
+      } catch (err: any) {
+        console.error('Verification error details:', err);
+        const errMsg = err?.message || err?.errors?.[0]?.message || 'Invalid verification code. Please check and try again.';
+        setError(errMsg);
+        setCode(''); // Clear digits for retry
+        
+        // Refocus after clearing
+        setTimeout(() => {
+          inputRef.current?.focus();
+        }, 100);
+      } finally {
+        setIsVerifying(false);
+      }
     }
   };
 
@@ -57,12 +77,12 @@ export default function VerificationModal({
     const boxes = [];
     for (let i = 0; i < 6; i++) {
       const char = code[i] || '';
-      const isFocused = i === code.length && visible;
+      const isFocused = i === code.length && visible && !isVerifying;
 
       boxes.push(
         <Pressable 
           key={i} 
-          onPress={() => inputRef.current?.focus()}
+          onPress={() => !isVerifying && inputRef.current?.focus()}
           className={`w-11 h-14 bg-surface border items-center justify-center rounded-xl shadow-sm transition-all ${
             isFocused 
               ? 'border-lingua-purple border-[2px] bg-white' 
@@ -99,15 +119,17 @@ export default function VerificationModal({
           <View className="w-full max-w-[340px] bg-white rounded-[28px] p-6 border border-border shadow-2xl relative">
             
             {/* Close Button */}
-            <Pressable 
-              onPress={onClose}
-              className="absolute top-4 right-4 w-8 h-8 items-center justify-center bg-surface rounded-full active:opacity-70"
-            >
-              <Ionicons name="close" size={18} color="#0D132B" />
-            </Pressable>
+            {!isVerifying && (
+              <Pressable 
+                onPress={onClose}
+                className="absolute top-4 right-4 w-8 h-8 items-center justify-center bg-surface rounded-full active:opacity-70"
+              >
+                <Ionicons name="close" size={18} color="#0D132B" />
+              </Pressable>
+            )}
 
             {/* Email Icon / Header */}
-            <View className="items-center mt-2 mb-4">
+            <View className="items-center mt-2 mb-2">
               <View className="w-12 h-12 bg-lingua-purple/10 rounded-full items-center justify-center mb-3">
                 <Ionicons name="mail-open" size={24} color="#6C4EF5" />
               </View>
@@ -120,10 +142,29 @@ export default function VerificationModal({
               </Text>
             </View>
 
-            {/* Code Inputs Container */}
-            <View className="flex-row justify-between w-full my-4 px-1">
-              {renderCodeBoxes()}
+            {/* Code Inputs Container / Loader */}
+            <View className="relative justify-center my-4 h-16 w-full">
+              {isVerifying ? (
+                <View className="flex-row items-center justify-center gap-2">
+                  <ActivityIndicator size="small" color="#6C4EF5" />
+                  <Text className="text-body-sm font-poppins-semibold text-lingua-purple">Verifying code...</Text>
+                </View>
+              ) : (
+                <View className="flex-row justify-between w-full px-1">
+                  {renderCodeBoxes()}
+                </View>
+              )}
             </View>
+
+            {/* In-Modal Error Callout */}
+            {error && (
+              <View className="flex-row items-center justify-center bg-red-50 border border-red-100 rounded-xl p-2.5 mt-1 mb-3">
+                <Ionicons name="alert-circle" size={16} color="#EF4444" />
+                <Text className="text-[12px] font-poppins-semibold text-[#EF4444] ml-1.5 text-center flex-1 leading-tight">
+                  {error}
+                </Text>
+              </View>
+            )}
 
             {/* Hidden Input field backending the boxes */}
             <TextInput
@@ -135,10 +176,11 @@ export default function VerificationModal({
               style={styles.hiddenInput}
               caretHidden
               autoFocus
+              editable={!isVerifying}
             />
 
             {/* Help Links */}
-            <View className="items-center mt-4">
+            <View className="items-center mt-2">
               <Text className="text-caption font-poppins text-text-secondary">
                 Didn't receive the code?{' '}
                 <Text className="font-poppins-semibold text-lingua-purple active:opacity-70">
