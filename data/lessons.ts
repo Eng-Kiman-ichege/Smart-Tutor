@@ -1,17 +1,17 @@
 import { Lesson } from '../types/learning';
 
 export const lessons: Lesson[] = [
-  // SPANISH - UNIT 1
+  // ─── SPANISH ───────────────────────────────────────────────
   {
     id: 'es_lesson_1',
     unitId: 'es_unit_1',
     order: 1,
     title: 'Greetings & Introductions',
-    description: 'Learn how to say hello and introduce yourself in Spanish.',
+    description: 'Learn how to say hello and introduce yourself.',
     goals: ['Say hello and goodbye', 'Ask someone how they are', 'Introduce yourself'],
     aiTeacherPrompt: {
-      persona: 'You are a friendly and encouraging Spanish teacher named Maria. You are energetic and patient with beginners.',
-      instructions: 'Guide the student through basic greetings. Speak slowly and clearly. Encourage them to repeat after you and focus on their pronunciation of the H (silent) and J (like an English H).',
+      persona: 'You are a friendly and encouraging Spanish teacher named Maria.',
+      instructions: 'Guide the student through basic greetings. Speak slowly and clearly.',
       scenario: 'Meeting a new friend for the first time.',
     },
     activities: [
@@ -42,14 +42,84 @@ export const lessons: Lesson[] = [
         title: 'Practice with Maria',
         aiPrompt: {
           persona: 'Maria, Spanish Teacher',
-          instructions: 'Start by asking the user how they are doing. Wait for them to respond using "¿Cómo estás?" or "Hola". Correct pronunciation gently if needed.',
+          instructions: 'Start by asking the user how they are doing.',
           scenario: 'Roleplay: You bump into the student on the street.',
         },
-      }
+      },
     ],
   },
-  
-  // FRENCH - UNIT 1
+  {
+    id: 'es_lesson_2',
+    unitId: 'es_unit_1',
+    order: 2,
+    title: 'Daily Life',
+    description: 'Talk about your daily routine in Spanish.',
+    goals: ['Describe your day', 'Use common daily verbs'],
+    aiTeacherPrompt: {
+      persona: 'Maria',
+      instructions: 'Teach daily routine vocabulary.',
+      scenario: 'Describing a typical morning.',
+    },
+    activities: [],
+  },
+  {
+    id: 'es_lesson_3',
+    unitId: 'es_unit_1',
+    order: 3,
+    title: 'At the Café',
+    description: 'Order food and drinks at a Spanish café.',
+    goals: ['Order a coffee', 'Ask for the bill'],
+    aiTeacherPrompt: {
+      persona: 'Maria',
+      instructions: 'Teach café vocabulary and ordering.',
+      scenario: 'At a café in Madrid.',
+    },
+    activities: [],
+  },
+  {
+    id: 'es_lesson_4',
+    unitId: 'es_unit_1',
+    order: 4,
+    title: 'Travel & Directions',
+    description: 'Ask for and give directions in Spanish.',
+    goals: ['Ask for directions', 'Understand directions'],
+    aiTeacherPrompt: {
+      persona: 'Maria',
+      instructions: 'Teach directional vocabulary.',
+      scenario: 'Getting around the city.',
+    },
+    activities: [],
+  },
+  {
+    id: 'es_lesson_5',
+    unitId: 'es_unit_1',
+    order: 5,
+    title: 'Shopping',
+    description: 'Shop and negotiate prices in Spanish.',
+    goals: ['Ask for prices', 'Say what you want to buy'],
+    aiTeacherPrompt: {
+      persona: 'Maria',
+      instructions: 'Teach shopping vocabulary.',
+      scenario: 'At a Spanish market.',
+    },
+    activities: [],
+  },
+  {
+    id: 'es_lesson_6',
+    unitId: 'es_unit_1',
+    order: 6,
+    title: 'Family & Friends',
+    description: 'Talk about your family and friends.',
+    goals: ['Name family members', 'Describe relationships'],
+    aiTeacherPrompt: {
+      persona: 'Maria',
+      instructions: 'Teach family vocabulary.',
+      scenario: 'Showing family photos.',
+    },
+    activities: [],
+  },
+
+  // ─── FRENCH ────────────────────────────────────────────────
   {
     id: 'fr_lesson_1',
     unitId: 'fr_unit_1',
@@ -59,8 +129,8 @@ export const lessons: Lesson[] = [
     goals: ['Say hello and goodbye', 'Say please and thank you'],
     aiTeacherPrompt: {
       persona: 'You are a patient and elegant French teacher named Pierre.',
-      instructions: 'Teach the student basic French pleasantries. Focus on nasal sounds and the correct pronunciation of the French R.',
-      scenario: 'Entering a French bakery (boulangerie).',
+      instructions: 'Teach the student basic French pleasantries.',
+      scenario: 'Entering a French bakery.',
     },
     activities: [
       {
@@ -70,13 +140,53 @@ export const lessons: Lesson[] = [
         vocabulary: [
           { word: 'Bonjour', translation: 'Hello/Good morning', pronunciation: 'bohn-ZHOOR' },
           { word: 'Merci', translation: 'Thank you', pronunciation: 'mair-SEE' },
-          { word: 'S\'il vous plaît', translation: 'Please', pronunciation: 'seel voo PLEH' },
+          { word: "S'il vous plaît", translation: 'Please', pronunciation: 'seel voo PLEH' },
         ],
-      }
-    ]
+      },
+    ],
   },
-  
-  // JAPANESE - UNIT 1
+  {
+    id: 'fr_lesson_2',
+    unitId: 'fr_unit_1',
+    order: 2,
+    title: 'Daily Routine',
+    description: 'Describe your daily routine in French.',
+    goals: ['Use daily verbs', 'Tell the time'],
+    aiTeacherPrompt: { persona: 'Pierre', instructions: 'Teach daily routine.', scenario: 'Morning at home.' },
+    activities: [],
+  },
+  {
+    id: 'fr_lesson_3',
+    unitId: 'fr_unit_1',
+    order: 3,
+    title: 'At the Boulangerie',
+    description: 'Order bread and pastries in French.',
+    goals: ['Order baked goods', 'Ask for prices'],
+    aiTeacherPrompt: { persona: 'Pierre', instructions: 'Teach bakery vocabulary.', scenario: 'At a French bakery.' },
+    activities: [],
+  },
+  {
+    id: 'fr_lesson_4',
+    unitId: 'fr_unit_1',
+    order: 4,
+    title: 'Numbers & Colors',
+    description: 'Learn numbers and colors in French.',
+    goals: ['Count to 20', 'Name 10 colors'],
+    aiTeacherPrompt: { persona: 'Pierre', instructions: 'Teach numbers and colors.', scenario: 'Describing a painting.' },
+    activities: [],
+  },
+  {
+    id: 'fr_lesson_5',
+    unitId: 'fr_unit_1',
+    order: 5,
+    title: 'Family & Home',
+    description: 'Talk about your family and home.',
+    goals: ['Name family members', 'Describe rooms'],
+    aiTeacherPrompt: { persona: 'Pierre', instructions: 'Teach family vocabulary.', scenario: 'Showing a photo album.' },
+    activities: [],
+  },
+
+  // ─── JAPANESE ──────────────────────────────────────────────
   {
     id: 'ja_lesson_1',
     unitId: 'ja_unit_1',
@@ -86,7 +196,7 @@ export const lessons: Lesson[] = [
     goals: ['Say good morning and hello', 'Thank someone formally'],
     aiTeacherPrompt: {
       persona: 'You are Kenji, an organized and supportive Japanese teacher.',
-      instructions: 'Introduce formal and casual greetings. Emphasize bowing culture briefly if asked.',
+      instructions: 'Introduce formal and casual greetings.',
       scenario: 'Meeting a coworker at the office.',
     },
     activities: [
@@ -97,8 +207,48 @@ export const lessons: Lesson[] = [
         vocabulary: [
           { word: 'Konnichiwa (こんにちは)', translation: 'Hello', pronunciation: 'kon-nee-chee-wa' },
           { word: 'Arigatou gozaimasu (ありがとうございます)', translation: 'Thank you (formal)', pronunciation: 'ah-ree-gah-toh go-zai-mas' },
-        ]
-      }
-    ]
-  }
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ja_lesson_2',
+    unitId: 'ja_unit_1',
+    order: 2,
+    title: 'Hiragana Basics',
+    description: 'Learn the first 10 Hiragana characters.',
+    goals: ['Read a, i, u, e, o', 'Write basic characters'],
+    aiTeacherPrompt: { persona: 'Kenji', instructions: 'Teach Hiragana writing.', scenario: 'Writing lesson.' },
+    activities: [],
+  },
+  {
+    id: 'ja_lesson_3',
+    unitId: 'ja_unit_1',
+    order: 3,
+    title: 'Numbers (Kazu)',
+    description: 'Count from 1 to 100 in Japanese.',
+    goals: ['Count to 10', 'Use numbers in context'],
+    aiTeacherPrompt: { persona: 'Kenji', instructions: 'Teach numbers.', scenario: 'Shopping at a store.' },
+    activities: [],
+  },
+  {
+    id: 'ja_lesson_4',
+    unitId: 'ja_unit_1',
+    order: 4,
+    title: 'At a Restaurant',
+    description: 'Order food at a Japanese restaurant.',
+    goals: ['Order food and drinks', 'Ask for the bill'],
+    aiTeacherPrompt: { persona: 'Kenji', instructions: 'Teach restaurant vocabulary.', scenario: 'At a ramen shop.' },
+    activities: [],
+  },
+  {
+    id: 'ja_lesson_5',
+    unitId: 'ja_unit_1',
+    order: 5,
+    title: 'Family (Kazoku)',
+    description: 'Talk about your family in Japanese.',
+    goals: ['Name family members', 'Use polite forms'],
+    aiTeacherPrompt: { persona: 'Kenji', instructions: 'Teach family words.', scenario: 'Introducing family.' },
+    activities: [],
+  },
 ];
