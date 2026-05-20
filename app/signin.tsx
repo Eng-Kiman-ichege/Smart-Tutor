@@ -1,0 +1,185 @@
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  Pressable, 
+  TextInput, 
+  ScrollView, 
+  KeyboardAvoidingView, 
+  Platform 
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
+import { Link, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import VerificationModal from '../components/VerificationModal';
+
+// Static asset import
+import mascotAuth from '../assets/images/mascot-auth.png';
+
+export default function SignInScreen() {
+  const router = useRouter();
+  
+  // State variables
+  const [email, setEmail] = useState('alex@gmail.com');
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // Triggered when Log In is pressed
+  const handleSignIn = () => {
+    // Open verification modal
+    setModalVisible(true);
+  };
+
+  // Called when the 6th digit is correctly entered in the modal
+  const handleVerifySuccess = () => {
+    setModalVisible(false);
+    // Replace stack to home route (/)
+    router.replace('/');
+  };
+
+  return (
+    <SafeAreaView className="flex-1 bg-white">
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+      >
+        <ScrollView 
+          contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          className="flex-1"
+        >
+          <View className="flex-1 justify-between px-6 py-4">
+            
+            {/* Header / Back Navigation */}
+            <View className="flex-row items-center justify-between mb-4">
+              <Link href="/" asChild>
+                <Pressable className="w-10 h-10 items-center justify-center bg-surface border border-border/40 rounded-full active:opacity-70">
+                  <Ionicons name="chevron-back" size={22} color="#0D132B" />
+                </Pressable>
+              </Link>
+              {/* Empty placeholder for perfect alignment */}
+              <View className="w-10 h-10" />
+            </View>
+
+            {/* Main Content Section */}
+            <View className="flex-1 justify-center max-w-[400px] w-full self-center">
+              
+              {/* Title & Subtitle */}
+              <View className="mb-2">
+                <Text className="text-[28px] font-poppins-bold text-text-primary tracking-tight leading-tight">
+                  Welcome back
+                </Text>
+                <Text className="text-body-md font-poppins text-text-secondary mt-1">
+                  Continue your language journey today ✨
+                </Text>
+              </View>
+
+              {/* Mascot popping up */}
+              <View className="items-center justify-center mt-2 mb-4">
+                <Image 
+                  source={mascotAuth} 
+                  className="w-[120px] h-[120px]"
+                  contentFit="contain"
+                />
+              </View>
+
+              {/* Inputs Form Block (Email ONLY, Passwordless) */}
+              <View className="gap-3">
+                
+                {/* Email Outlined Input */}
+                <View className="bg-surface/50 border border-border/80 px-4 py-2.5 rounded-2xl focus-within:border-lingua-purple">
+                  <Text className="text-[11px] font-poppins-bold text-text-secondary uppercase tracking-wider">
+                    Email
+                  </Text>
+                  <TextInput
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="Enter your email"
+                    placeholderTextColor="#9CA3AF"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    className="text-[16px] font-poppins-semibold text-text-primary mt-0.5 py-0.5"
+                  />
+                </View>
+
+              </View>
+
+              {/* Primary Call-to-Action Log In Button */}
+              <Pressable 
+                onPress={handleSignIn}
+                className="mt-6 active:scale-[0.98] transition-all"
+              >
+                <View className="bg-lingua-purple flex-row items-center justify-center py-4 rounded-2xl border-t border-white/20 shadow-lg shadow-lingua-purple/35">
+                  <Text className="text-h4 font-poppins-semibold text-white tracking-wide">
+                    Log In
+                  </Text>
+                </View>
+              </Pressable>
+
+              {/* Divider Block */}
+              <View className="flex-row items-center my-6">
+                <View className="flex-1 h-[1px] bg-border/50" />
+                <Text className="px-4 text-caption font-poppins-medium text-text-secondary">
+                  or continue with
+                </Text>
+                <View className="flex-1 h-[1px] bg-border/50" />
+              </View>
+
+              {/* Social Login Grid Stack */}
+              <View className="gap-2.5">
+                
+                {/* Google Button */}
+                <Pressable className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all">
+                  <Ionicons name="logo-google" size={18} color="#EA4335" />
+                  <Text className="text-body-md font-poppins-medium text-text-primary ml-3">
+                    Continue with Google
+                  </Text>
+                </Pressable>
+
+                {/* Facebook Button */}
+                <Pressable className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all">
+                  <Ionicons name="logo-facebook" size={18} color="#1877F2" />
+                  <Text className="text-body-md font-poppins-medium text-text-primary ml-3">
+                    Continue with Facebook
+                  </Text>
+                </Pressable>
+
+                {/* Apple Button */}
+                <Pressable className="bg-white border border-border/60 py-3.5 px-6 rounded-2xl flex-row items-center justify-center active:bg-surface transition-all">
+                  <Ionicons name="logo-apple" size={18} color="#000000" />
+                  <Text className="text-body-md font-poppins-medium text-text-primary ml-3">
+                    Continue with Apple
+                  </Text>
+                </Pressable>
+
+              </View>
+
+            </View>
+
+            {/* Bottom Nav Switcher Link */}
+            <View className="items-center justify-center pt-6 pb-2">
+              <Text className="text-body-sm font-poppins text-text-secondary">
+                Don't have an account?{' '}
+                <Link href="/signup" asChild>
+                  <Text className="font-poppins-semibold text-lingua-purple active:opacity-75">
+                    Sign up
+                  </Text>
+                </Link>
+              </Text>
+            </View>
+
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Verification Modal Component */}
+      <VerificationModal
+        visible={modalVisible}
+        email={email}
+        onClose={() => setModalVisible(false)}
+        onVerifySuccess={handleVerifySuccess}
+      />
+    </SafeAreaView>
+  );
+}
